@@ -1,100 +1,235 @@
 # AI-Powered Placement Preparation and Career Guidance System
 
-## Project Title
+A full-stack web application that helps engineering students prepare for placements: aptitude and coding
+practice, resume building, mock interviews, and AI-powered (Google Gemini) career recommendations.
 
-**AI-Powered Placement Preparation and Career Guidance System**
-
----
-
-## Problem Statement
-
-Many students face difficulties in preparing for placements due to a lack of personalized guidance, skill assessment, interview preparation resources, and career recommendations. Existing platforms often provide generic learning materials without considering individual strengths, weaknesses, and career goals. This results in inefficient preparation and reduced placement opportunities.
+**Tech Stack:** React (Vite) + Tailwind CSS · Node.js + Express.js · MySQL · JWT Auth · Google Gemini API
 
 ---
 
-## Project Objective
+## 1. Project Structure
 
-The primary objective of this project is to develop an intelligent platform that assists students in placement preparation and career planning by utilizing Artificial Intelligence techniques. The system aims to:
-
-* Analyze student skills and performance.
-* Provide personalized placement preparation plans.
-* Recommend suitable career paths based on interests and abilities.
-* Conduct AI-based mock interviews and assessments.
-* Track progress and suggest improvements.
-* Enhance student employability and placement success rates.
-
----
-
-## Proposed Solution
-
-The AI-Powered Placement Preparation and Career Guidance System offers a comprehensive solution for students by integrating machine learning and intelligent recommendation systems. The platform evaluates student profiles, identifies skill gaps, and generates customized learning paths. It also provides interview preparation support, aptitude assessments, and career recommendations to help students achieve their professional goals.
-
----
-
-## Features
-
-* Student Profile Management
-* Skill Assessment and Analysis
-* AI-Based Career Recommendation
-* Placement Preparation Dashboard
-* Aptitude Test Module
-* Mock Interview System
-* Resume Analysis
-* Progress Tracking and Reporting
-* Personalized Learning Recommendations
-* Admin Management Panel
+```
+placement-system/
+├── frontend/                 # React + Vite + Tailwind app
+│   ├── src/
+│   │   ├── components/       # Navbar, Footer, Sidebar, ProtectedRoute
+│   │   ├── context/          # AuthContext, ThemeContext
+│   │   ├── layouts/          # DashboardLayout
+│   │   ├── pages/            # Home, Login, Register, Dashboard, Aptitude, ...
+│   │   └── services/         # api.js (Axios client)
+│   ├── package.json
+│   └── .env.example
+├── backend/                  # Node.js + Express API
+│   ├── config/db.js          # MySQL connection pool
+│   ├── controllers/          # Route handlers
+│   ├── routes/                # Express routers
+│   ├── middleware/           # JWT auth, error handler
+│   ├── services/geminiService.js  # Gemini AI integration
+│   ├── utils/generateToken.js
+│   ├── server.js             # App entry point
+│   ├── package.json
+│   └── .env.example
+└── database/
+    └── schema.sql            # MySQL schema + sample data
+```
 
 ---
 
-## Technology Stack
+## 2. Prerequisites
 
-| Category             | Technology                      |
-| -------------------- | ------------------------------- |
-| Frontend             | HTML, CSS, JavaScript, React.js |
-| Backend              | Spring Boot                     |
-| Programming Language | Java                            |
-| Database             | MySQL                           |
-| AI/ML                | Python, Scikit-learn            |
-| API Testing          | Postman                         |
-| Version Control      | Git & GitHub                    |
-| IDE                  | VS Code, IntelliJ IDEA          |
+- Node.js 18+ and npm
+- MySQL 8+ (or MariaDB) running locally or remotely
+- A Google Gemini API key — get one at https://aistudio.google.com/app/apikey
+- VS Code (recommended) with the "ES7+ React/Redux/JS Snippets" and "MySQL" extensions (optional but helpful)
 
 ---
 
-## System Modules
+## 3. Database Setup
 
-| Module                       | Description                               |
-| ---------------------------- | ----------------------------------------- |
-| Student Module               | Manage profiles and learning progress     |
-| Skill Assessment Module      | Evaluate technical and aptitude skills    |
-| Career Guidance Module       | Suggest suitable career paths             |
-| Placement Preparation Module | Provide learning materials and tests      |
-| Mock Interview Module        | Conduct AI-assisted interview sessions    |
-| Resume Analysis Module       | Evaluate resumes and suggest improvements |
-| Admin Module                 | Manage users, content, and reports        |
+1. Start your MySQL server.
+2. Run the schema file to create the database, tables, and sample data:
 
----
+```bash
+mysql -u root -p < database/schema.sql
+```
 
-## Expected Outcomes
+This creates the `placement_system` database with all 11 tables (students, skills, student_skills,
+aptitude_questions, aptitude_attempts, coding_problems, coding_submissions, career_recommendations,
+learning_resources, resumes, mock_interviews, progress, admin_users) and inserts sample questions,
+problems, skills, and resources.
 
-* Improved placement readiness among students.
-* Personalized career guidance based on data analysis.
-* Better identification of skill gaps.
-* Enhanced interview performance.
-* Increased placement success rate.
+3. **Important:** The sample admin row in `schema.sql` has a placeholder password hash. To create a real
+   admin login, generate a bcrypt hash and update the row:
 
----
+```bash
+node -e "console.log(require('bcryptjs').hashSync('YourAdminPassword123', 10))"
+```
 
-## Future Enhancements
-
-* Integration with real-time job portals.
-* Advanced AI chatbot for career counseling.
-* Speech analysis during mock interviews.
-* Company-specific placement preparation modules.
-* Mobile application support.
+Then in MySQL:
+```sql
+UPDATE admin_users SET password = '<generated_hash>' WHERE email = 'admin@placementsystem.com';
+```
 
 ---
 
-## Conclusion
+## 4. Backend Setup
 
-The AI-Powered Placement Preparation and Career Guidance System leverages Artificial Intelligence to provide personalized placement preparation and career planning support. By identifying skill gaps, recommending learning paths, and offering intelligent career guidance, the system helps students improve their employability and achieve their career objectives effectively.
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
+
+Edit `.env` with your actual values:
+
+```
+PORT=5000
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=placement_system
+JWT_SECRET=replace_this_with_a_long_random_secret_key
+JWT_EXPIRES_IN=7d
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
+CLIENT_URL=http://localhost:5173
+```
+
+Run the backend:
+
+```bash
+npm run dev      # with nodemon (auto-restart)
+# or
+npm start        # plain node
+```
+
+The API will be available at `http://localhost:5000/api`. Visit `http://localhost:5000/api/health` to
+confirm it's running.
+
+---
+
+## 5. Frontend Setup
+
+Open a **second terminal**:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+```
+
+Edit `.env` if your backend runs on a different host/port:
+
+```
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+Run the frontend:
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:5173` in your browser.
+
+---
+
+## 6. Running the Full Project in VS Code (Step by Step)
+
+1. Open the `placement-system` folder in VS Code (`File > Open Folder`).
+2. Open a terminal (`` Ctrl+` ``) and split it into two panels (`Terminal > Split Terminal`).
+3. In the first terminal: `cd backend && npm install && npm run dev`
+4. In the second terminal: `cd frontend && npm install && npm run dev`
+5. Make sure MySQL is running and you've imported `database/schema.sql`.
+6. Make sure both `.env` files are filled in (see sections 4 and 5).
+7. Open `http://localhost:5173` in your browser — register a new student account and explore the app.
+8. To log in as admin, use the email/password you set in step 3 of Database Setup.
+
+---
+
+## 7. API Endpoint Documentation
+
+Base URL: `http://localhost:5000/api`
+
+### Authentication
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/auth/register` | No | Register a new student |
+| POST | `/auth/login` | No | Login (student or admin) |
+| GET | `/auth/profile` | Yes | Get logged-in user's profile |
+
+### Students
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/students` | Admin | List/search all students |
+| GET | `/students/:id` | Yes | Get a student's full profile |
+| PUT | `/students/:id` | Yes | Update a student's profile |
+| DELETE | `/students/:id` | Admin | Delete a student |
+
+### Skills
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/skills` | No | List all master skills |
+| POST | `/skills` | Yes | Add/update a skill for the logged-in student |
+
+### Aptitude
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/aptitude/questions?category=Quantitative&limit=10` | No | Get random questions |
+| POST | `/aptitude/submit` | Yes | Submit answers, get score + analysis |
+
+### Coding
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/coding/problems?difficulty=Easy` | No | List coding problems |
+| POST | `/coding/submit` | Yes | Submit code for a problem |
+
+### AI (Google Gemini)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/ai/recommend-career` | Yes | Get career role, skill gaps, roadmap |
+| POST | `/ai/skill-gap` | Yes | Compare current skills vs a target role |
+| POST | `/ai/resume-feedback` | Yes | Get AI feedback on resume content |
+| POST | `/ai/interview-questions` | Yes | Generate mock interview questions |
+
+### Progress
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/progress/:studentId` | Yes | Get module-wise progress + stats |
+| POST | `/progress/update` | Yes | Update completion % for a module |
+
+### Resources
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/resources?category=Java` | No | List learning resources |
+| POST | `/resources` | Admin | Add a new resource |
+
+All authenticated endpoints require an `Authorization: Bearer <token>` header, where `<token>` is the
+JWT returned by `/auth/login` or `/auth/register`.
+
+---
+
+## 8. Notes on the Gemini AI Integration
+
+`backend/services/geminiService.js` wraps all calls to the Gemini API through the official
+`@google/generative-ai` SDK. Every AI-facing controller (`aiController.js`) funnels through this file, so
+the model name, prompt format, and JSON parsing logic live in one place. If Gemini returns text that
+isn't valid JSON (which can happen occasionally with any LLM), the service falls back to returning
+`{ raw: text }` so the frontend can still display something instead of erroring out.
+
+## 9. Notes on the Coding Judge
+
+The `/api/coding/submit` endpoint currently **simulates** a "Passed" result to demonstrate the full flow
+(this is intentionally beginner-friendly and safe to run without a sandboxed code execution environment).
+For production use, replace the logic in `backend/controllers/codingController.js` with a real code
+execution service (e.g., Judge0, a Docker-based sandbox, or a serverless code runner).
+
+## 10. Security Notes
+
+- Passwords are hashed with bcrypt before storage — never stored in plain text.
+- JWTs are signed with `JWT_SECRET` — use a long, random value in production and never commit `.env`.
+- CORS is restricted to `CLIENT_URL` — update this when deploying to a real domain.
+- This project is built for learning/demo purposes; add rate limiting, input sanitization, and HTTPS
+  before deploying publicly.
